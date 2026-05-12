@@ -4,6 +4,7 @@ on:
   workflow_call:
     inputs:
       service-name:
+        # Callers pass their repo name so the Docker step is easy to identify.
         required: true
         type: string
 
@@ -12,10 +13,12 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
+      # Each job checks out the repo because jobs run on separate runners.
       - uses: actions/checkout@v4
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
+      # Lint first so style and static analysis issues fail fast.
       - uses: golangci/golangci-lint-action@v6
         with:
           version: latest
@@ -29,6 +32,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
+      # Run all Go tests before compiling or packaging the service.
       - run: go test -v ./...
 
   build:
@@ -40,6 +44,7 @@ jobs:
       - uses: actions/setup-go@v5
         with:
           go-version: "1.22"
+      # Confirm the application compiles cleanly for this commit.
       - run: go build ./...
 
   docker:
@@ -48,6 +53,7 @@ jobs:
     needs: build
     steps:
       - uses: actions/checkout@v4
+      # Build the image without pushing so CI verifies the Dockerfile works.
       - name: Build Docker image
         run: |
           docker build -t ${{ inputs.service-name }}:ci .
