@@ -1,11 +1,11 @@
 name: Go CI
 
 on:
-  push:
-    branches: [main]        # ← remove this line if you want ZERO runs on direct push
-  pull_request:
-    branches: [main]        # ← this is the one that matters — runs on PR targeting main
-    types: [opened, synchronize, reopened]  # triggers on new PR, new commit pushed to PR, or reopened
+  workflow_call:          # ← this MUST be here, it's what makes it reusable
+    inputs:
+      service-name:
+        required: true
+        type: string
 
 jobs:
   lint:
